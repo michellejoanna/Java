@@ -30,12 +30,12 @@ class ParkingTicket {
         this.entry = LocalDateTime.now();
     }
 }
-class CampusParkingSystem {
+class ParkingService {
     private final String[][] slots;
     private final Map<String, ParkingTicket> active = new HashMap<>();
     private long nextTicket = 1000;
 
-    CampusParkingSystem(int[] capacities) {
+    ParkingService(int[] capacities) {
         slots = new String[capacities.length][];
         for (int i = 0; i < capacities.length; i++) slots[i] = new String[capacities[i]];
     }
@@ -64,7 +64,7 @@ class CampusParkingSystem {
 }
 public class CampusParkingSystemDemo {
     public static void main(String[] args) {
-        CampusParkingSystem system = new CampusParkingSystem(new int[]{2, 2, 1});
+        ParkingService system = new ParkingService(new int[]{2, 2, 1});
         ParkingTicket t = system.enter(new ParkingVehicle("TN01AB1234", VehicleType.CAR));
         System.out.println("Ticket " + t.id + " allocated floor " + t.floor + ", slot " + t.slot);
         System.out.println("Fee on exit (approximate short stay): Rs " +
