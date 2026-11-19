@@ -4,7 +4,7 @@ import java.util.*;
 interface Pass {
     boolean isValid(LocalDate date);
 }
-class OneDayVisitorPass implements Pass {
+class EBike {\n    private static final double FLAT_PARKING_FEE = 25.0;\n    double parkingFee() { return FLAT_PARKING_FEE; }\n}\nclass OneDayVisitorPass implements Pass {
     private final LocalDate validDate;
     OneDayVisitorPass(LocalDate validDate) { this.validDate = Objects.requireNonNull(validDate); }
     @Override public boolean isValid(LocalDate date) { return validDate.equals(date); }
@@ -66,6 +66,6 @@ public class ExtendedCampusParkingSystem {
         LocalDateTime out = LocalDate.now().atTime(18, 0);
         PricingRule vanRule = new DeliveryVanPricingRule();
         System.out.println("Delivery van fee for 8 AM–6 PM: Rs " + vanRule.fee(in, out, 30.0));
-        System.out.println("E-bike flat fee example: Rs 25.0");
+        System.out.println("E-bike flat parking fee: Rs " + new EBike().parkingFee());
     }
 }
