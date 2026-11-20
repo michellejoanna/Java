@@ -1,0 +1,11 @@
+import java.sql.*;
+import java.math.BigDecimal;
+
+public class WalletTransactionDemo{
+ static final String URL=System.getenv().getOrDefault("DB_URL","jdbc:mysql://localhost:3306/assignment5");
+ static final String USER=System.getenv().getOrDefault("DB_USER","root"),PASS=System.getenv().getOrDefault("DB_PASSWORD","");
+ static void setup(Connection c)throws SQLException{try(Statement s=c.createStatement()){s.executeUpdate("CREATE TABLE IF NOT EXISTS wallets(wallet_id VARCHAR(20) PRIMARY KEY,balance DECIMAL(12,2) NOT NULL CHECK(balance>=0))");}try(PreparedStatement p=c.prepareStatement("INSERT IGNORE INTO wallets VALUES(?,?)")){p.setString(1,"HOSTEL");p.setBigDecimal(2,new BigDecimal("10000"));p.executeUpdate();p.setString(1,"CANTEEN");p.setBigDecimal(2,new BigDecimal("2000"));p.executeUpdate();}}
+ static void transfer(Connection c,String from,String to,BigDecimal amount)throws SQLException{if(amount.signum()<=0)throw new IllegalArgumentException("Amount must be positive");boolean old=c.getAutoCommit();c.setAutoCommit(false);try(PreparedStatement d=c.prepareStatement("UPDATE wallets SET balance=balance-? WHERE wallet_id=? AND balance>=?");PreparedStatement cr=c.prepareStatement("UPDATE wallets SET balance=balance+? WHERE wallet_id=?")){d.setBigDecimal(1,amount);d.setString(2,from);d.setBigDecimal(3,amount);if(d.executeUpdate()!=1)throw new SQLException("Insufficient funds/source missing");cr.setBigDecimal(1,amount);cr.setString(2,to);if(cr.executeUpdate()!=1)throw new SQLException("Destination missing");c.commit();}catch(Exception e){c.rollback();throw e;}finally{c.setAutoCommit(old);}}
+ static boolean safeLookup(Connection c,String id,String amount)throws SQLException{try(PreparedStatement p=c.prepareStatement("SELECT 1 FROM wallets WHERE wallet_id=? AND balance=?")){p.setString(1,id);p.setString(2,amount);try(ResultSet r=p.executeQuery()){return r.next();}}}
+ public static void main(String[] args)throws Exception{try(Connection c=DriverManager.getConnection(URL,USER,PASS)){setup(c);transfer(c,"HOSTEL","CANTEEN",new BigDecimal("500.00"));System.out.println("₹500 transfer committed atomically.");System.out.println("Injection payload treated as data: "+safeLookup(c,"' OR '1'='1","0"));}}
+}
